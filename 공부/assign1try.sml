@@ -17,4 +17,12 @@ fun reverse(xs : int list) =
 	then []
 	else append(reverse(tl xs), hd xs::[])
 
+fun digits(x : int) =
+	if x div 10 = 0
+	then (x mod 10)::[]
+	else append(digits(x div 10), x mod 10::[] )
+
+
+
+
 
