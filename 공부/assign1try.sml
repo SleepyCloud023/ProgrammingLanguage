@@ -1,4 +1,8 @@
-(* I want to know using copy without aliasing *)
+fun sum_list(xs : int list) = 
+        if null xs
+        then 0
+        else hd xs + sum_list(tl xs)
+        
 fun append(xs : int list, ys : int list) =
 	if null xs
 	then ys
@@ -22,7 +26,20 @@ fun digits(x : int) =
 	then (x mod 10)::[]
 	else append(digits(x div 10), x mod 10::[] )
 
-
-
+fun digitalRoot(x: int) =
+        if x div 10 > 0
+        then digitalRoot( sum_list( digits(x) ) )
+        else 
+          if x div 10 = 0
+          then x
+          else ~1 (* if x is not positive integer *)
+          
+fun additivePersistence(x: int)=
+        if x div 10 > 0
+        then 1 + additivePersistence( sum_list( digits(x) ) )
+        else 
+          if x div 10 = 0
+          then 0
+          else ~1 (* if x is not positive integer  *)
 
 
