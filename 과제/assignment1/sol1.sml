@@ -1,15 +1,16 @@
-(* sum the numbers in list for digitalRoot function *)
+(* sum the numbers in list for digitalRoot & additivePersistence function *)
 fun sum_list(xs : int list) = 
         if null xs
         then 0
         else hd xs + sum_list(tl xs)
 
-
+(* concatenate two list xs and ys. I use this reverse & digits function,
+   So I write in upper scope rather using 'let in end' local function *)
 fun append(xs : int list, ys : int list) =
 	if null xs
 	then ys
 	else hd(xs) :: append(tl xs, ys)
-
+(* assumimg xs and ys are ascending order, I didn't make exception handle *)
 fun merge(xs : int list, ys : int list) =
 	if null xs
 	then ys
@@ -25,9 +26,9 @@ fun reverse(xs : int list) =
 
 fun sigma(a: int, b: int, f: int -> int ) = 
 	if a < b
-		then f(a) + sigma(a+1,b,f)
-		else 
-			if a = b
+	then f(a) + sigma(a+1,b,f)
+	else 
+		if a = b
 			then f(b)
 			else ~1 (* if a > b case : exception *)
 
