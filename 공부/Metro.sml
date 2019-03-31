@@ -26,4 +26,25 @@ fun checkMetro (x : metro) =
                                               orelse checkMetro(AREA(t1,c2))) 
 (* fail  *)                        
 val t = AREA("a", CONNECT(AREA("b", STATION "a"), AREA("c", AREA("a",
-CONNECT(STATION "b", AREA("d", STATION "c"))))))  
+CONNECT(STATION "b", AREA("d", STATION "c"))))))
+
+val Tcase = [AREA("a", STATION "a"), 
+AREA("a", AREA("a",STATION("a"))),
+AREA("a", AREA("b", CONNECT(STATION "a",STATION "b"))),
+AREA("a", CONNECT(STATION "a", AREA("b", STATION "a")))]
+
+val Fcase = [AREA("a", STATION "b"),
+AREA("a", AREA("a", STATION "b")),
+AREA("a",AREA("b",CONNECT(STATION "a", STATION "c"))),
+AREA("a", CONNECT(STATION "a", AREA("b", STATION "C") ) )]
+
+
+fun test( array : metro list) =
+  if null array
+  then true
+  else 
+    if checkMetro(hd array)
+    then checkMetro(hd (tl array))
+    else false
+
+
