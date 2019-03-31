@@ -3,31 +3,48 @@ datatype 'a lazyList = nullList
 
 fun seq(first : int, last : int) =
 	if first <= last
-	then cons(first,fn (first,last) = seq(first+1,last) )
+	then cons(first,fn f => seq(first+1,last) )
 	else nullList
 
 fun infSeq(first : int) =
-	cons(first,infSeq(first+1))
+	cons(first,fn f => infSeq(first+1))
 
-fun firstN(lazyListVal : lazyList, n :int) =
+fun firstN(lazyListVal : 'a lazyList, n :int) =
 	if n > 0
 	then
 		case lazyListVal of 
-			nullList x => []
-		|	cons(head,tail) => head::firstN(tail,n-1)
+			nullList => []
+		|	cons(head,tail) => head::firstN(tail(),n-1)
 	else []
 
-fun Nth(lazyListVal : lazyList, n: int) =
+fun Nth(lazyListVal : 'a lazyList, n: int) =
 	if n > 0
 	then 
 		case lazyListVal of
 			nullList => NONE
 		|   cons(head,tail) => 
 						if n = 1
-						then head
-						else Nth(tail,n-1)
+						then SOME(head)
+						else Nth(tail(),n-1)
 	else NONE
 
+fun filterMultiples(lazyListVal : int lazyList, n : int) =
+	if n > 0
+	then
+		case lazyListVal of 
+			nullList => nullList
+		|	cons(head,tail) => 
+			if head mod n = 0
+			then filterMultiples(tail(),n)
+			else cons(head, fn f => filterMultiples(tail(),n))
+	else nullList
+
+fun sieve(lazyListVal : int lazyList) =
+	case lazyListVal of 
+		nullList => nullList
+	|	cons(head,tail) => cons(head,fn f => (sieve(filterMultiples(tail(),head))) )
+
+fun primes() = sieve(infSeq(2))
 
 
 
