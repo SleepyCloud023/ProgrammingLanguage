@@ -23,7 +23,15 @@ fun eval( x: formula ) =
 	|	NOT x => not (eval x)
 	|	ANDALSO(x1 ,x2) => (eval x1) andalso (eval x2) 
 	|	ORELSE(x1, x2) => (eval x1) orelse (eval x2)
-	|	IMPLY(x1, x2) => (eval x1 = false) orelse ((eval x1) andalso (eval x2))
+	(* x1 implies x2 is true when x2 is false or x1 and x2 are simultaneously true *)
+	|	IMPLY(x1, x2) => (eval (NOT(x1))) orelse ((eval x1) andalso (eval x2))
 	|	LESS(x1, x2) => if eval_expr(x1) < eval_expr(x2) 
 						then true
 						else false
+
+(* test *)
+
+val a = NUM 1
+val b = NUM 2
+val plus = PLUS(a,b)
+val minus = MINUS(a,b)
