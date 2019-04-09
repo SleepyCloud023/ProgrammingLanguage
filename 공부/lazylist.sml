@@ -8,7 +8,7 @@ fun seq(first : int, last : int) =
 
 fun infSeq(first : int) =
 	cons(first,fn f => infSeq(first+1))
-
+(* still loop when lazylist is shorter than n, how can this break out? *)
 fun firstN(lazyListVal : 'a lazyList, n :int) =
 	if n > 0
 	then
