@@ -22,10 +22,18 @@
         )
 )
 
+(define (proper xs)
+  (cond [(empty? xs) #t]
+        [(and (number? (car xs)) (list? (car (cdr xs))) (list?(car (cddr xs))) )
+         (and (proper (car (cdr xs))) (proper (car (cddr xs))) )]
+        [#t #f]
+        )
+  )
   
 
 (define (check_bst xs)
-  (if (and (check_ascending (extract xs)) (not (empty? xs)) )
+  (cond [(empty? xs) #t]
+        [(and (proper xs) (check_ascending (extract xs)))
       (let ([center (car xs)]
             [left (car (cdr xs))]
             [right (car (cddr xs))]
@@ -41,8 +49,8 @@
               [(and (not (number? (car xs))) (not (empty? (car xs)))) #f]
               [#t #f]
               )
-        )
-      #f
+        )]
+        [#t #f]
       )
 )
           
@@ -76,12 +84,12 @@
     )
   )
     
-
+;(define (f x) (* x x))
 ;(define a ' (8 (3 (1 () ()) (6 (4 () ()) (7 () ()))) (10 () (14 (13 () ()) ()))))
 ;(define b '(7 (6 ()(10 () ())) (8 ()()))) ; not BST
 ;(define c '(6 () (7 () ())))
 ;(define d '(7 (6 ()()) (8 ()(10 () ()))))
-;(define e '(6 () (7 () (8 () (10 () ())))))
-
+;(define e '(6 (-3 () (-1 () ())) (7 () (8 () (10 () ())))))
+;(define k '(6 () (8 (6 () ()) ())))
 
 
