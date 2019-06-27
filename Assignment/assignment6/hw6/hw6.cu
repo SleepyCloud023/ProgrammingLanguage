@@ -9,7 +9,7 @@
 #include<vector>
 #include<string>
 
-#define TILE_WIDTH 2   /* set TILE_WIDTH 16 for the evaluation! */
+#define TILE_WIDTH 16   /* set TILE_WIDTH 16 for the evaluation! */
 #define MAXPOOL_INPUT_FILENAME "input.txt"
 #define A_FILENAME "a.txt"
 #define B_FILENAME "b.txt"
@@ -17,22 +17,32 @@
 
 using namespace std;
 
-
-
 __global__ void maxpool(float *input, float *output, const int input_size, const int filter_size) {
     // input : input_matrix address
     // output : output buffer address
     // input_size : width, height of input matrix
     // filter_size : filter_size of maxpolling
     // all input, output matrices are vectorized
-
     int col = blockDim.x * blockIdx.x + threadIdx.x;
     int row = blockDim.y * blockIdx.y + threadIdx.y;
-
     // out of bound
-
     // CHANGE
+    int output_size = input_size / filter_size;
+
+    if(row < output_size && col < output_size){
+        float result = -1.0;
+         int row_f = row * filter_size;
+         int col_f = col * filter_size;
+         for (int i = 0; i < filter_size ; i++){
+                for(int j = 0; j < filter_size; j++){
+                    float temp = input[(row_f + i) * input_size + col_f + j];
+                    if( temp > result) { result = temp; }
+                }
+         }
+    output[row * output_size + col] = result;
+    }
 }
+
 
 __global__ void gemm(float *a, float *b, float *c, const float alpha, const float beta, float *output, const int input_size){
     // a, b, c : input matrix address
@@ -46,9 +56,9 @@ __global__ void gemm(float *a, float *b, float *c, const float alpha, const floa
 
     int row = by*blockDim.y + ty;
     int col = bx*blockDim.x + tx;
-    
+
     if(row>=input_size ||col>=input_size) { return; }
-    
+
     // allocate 2D tiles in __shared__ memory
     __shared__ float s_a[TILE_WIDTH][TILE_WIDTH];
     __shared__ float s_b[TILE_WIDTH][TILE_WIDTH];
@@ -63,7 +73,39 @@ __global__ void gemm(float *a, float *b, float *c, const float alpha, const floa
 
         // You need to use __syncthreads() a few times
         // to synchronize the threads in a thread block.
+        s_a[ty][tx] = a[row * input_size + p * TILE_WIDTH + tx];
+        s_b[ty][tx] = b[p * TILE_WIDTH * input_size + ty * input_size + col];
+ 
+        __syncthreads();
+        for (int q = 0; q < TILE_WIDTH; ++q) {
+            result += s_a[ty][q] * s_b[q][tx];
+        }
     }
+    s_a[ty][tx] = 0.0;
+    s_b[ty][tx] = 0.0;
+    int diff = input_size % TILE_WIDTH;
+    if (diff != 0 && row > input_size - diff && col > input_size - diff){
+        if(row < input_size && col < input_size){
+            s_a[ty][tx] = a[row * input_size + input_size - diff + tx];
+            s_b[ty][tx] = b[(input_size - diff) * input_size + ty * input_size + col];
+        }
+        __syncthreads();
+        for (int q = 0; q < TILE_WIDTH; ++q) {
+            result += s_a[ty][q] * s_b[q][tx];
+        }  
+        /*for (int i = input_size - diff; i < input_size; i++ ){
+        result += a[row * input_size + i] * b[i * input_size + col];
+        }
+        */
+    }
+    __syncthreads();
+
+    output[row * input_size + col] = alpha * result + beta * c[row * input_size + col];
+        // CHANGE
+
+        // You need to use __syncthreads() a few times
+        // to synchronize the threads in a thread block.
+
 
     // write out the result to output[row*input_size + col] 
     // CHANGE

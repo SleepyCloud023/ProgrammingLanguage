@@ -1,0 +1,101 @@
+#lang racket
+(define (my-append xs ys)
+  (if (null? xs)
+      ys
+      (cons (car xs) (my-append (cdr xs) ys))))
+(define (tail_append xs ys aux)
+  (if (null? xs)
+      (if (null? ys)
+          (reverse aux)
+          (tail_append ys null aux)
+          )
+      (tail_append (cdr xs) ys (cons (car xs) aux))
+      )
+  )
+(define (my-map f xs)
+  (if (null? xs)
+      null
+      (cons (f (car xs)) (my-map f (cdr xs)))
+      )
+  )
+(define (tail-map f xs aux)
+  (if (null? xs)
+      (reverse aux)
+      (tail-map f (cdr xs) (cons (f (car xs)) aux))
+      )
+  )
+
+(define cube
+  (lambda (x)
+    (* x x x)
+    )
+  )
+(define test
+  (lambda ()
+    (lambda ()
+      (* 5 5)
+      )
+  )
+  )
+(define a (list 1 5 2))
+
+(define (sum xs)
+  (if (null? xs)
+      0
+      (if (number? (car xs))
+          (+ (car xs) (sum (cdr xs)))
+          (+ (sum (car xs)) (sum (cdr xs))))))
+(define (type-check x)
+  (cond [(number? x) "number"]
+        [(string? x) "number"]
+        [(null? x) "null"]
+        [(list? x) "list"]
+        )
+  )
+(define (let*-add x)
+  (let* ([x (+ x 3)]
+         [x (+ x 4)])
+    x
+    )
+  )
+(define (silly-triple x)
+  (letrec ([y (+ x 2)]
+           [f (lambda(z) (+ z y w x))]
+           [w (+ x 7)])
+     (f -9)))
+(define (bad-letrec x)
+  (letrec ([y z]
+           [z 13])
+     (if x y z)))
+
+(define (my-if-bad x y z)
+  (if x y z))
+
+(define (factorial-bad n)
+  (my-if-bad (= n 0)
+             1
+             (* n (factorial-bad (- n 1)))))
+(define (number-until stream tester)
+  (letrec ([f (lambda (stream ans)
+                (let ([pr (stream)])
+                  (if (tester (car pr))
+                      ans
+                      (f (cdr pr) (+ ans 1)))))])
+    (f stream 1)))
+
+(define power-of-two
+  (letrec ([f (lambda (x)
+                (cons x (lambda () (f (* 2 x)))))])
+    (lambda () (f 2))
+    )
+  )
+
+(define (my-force p)
+  (if (mcar p)
+      (mcdr p)
+      (begin (set-mcar! p #t)
+             (set-mcdr! p ((mcdr p)))
+             (mcdr p))))
+                      
+                  
+
